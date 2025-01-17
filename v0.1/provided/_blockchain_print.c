@@ -4,128 +4,138 @@
 #include "blockchain.h"
 
 /**
- * print_hex_data - Display a buffer as hexadecimal values
+ * _print_hex_buffer - Prints a buffer in its hexadecimal form
  *
- * @buffer: Pointer to the buffer to be displayed
- * @length: Number of bytes from @buffer to display
+ * @buf: Pointer to the buffer to be printed
+ * @len: Number of bytes from @buf to be printed
  */
-static void print_hex_data(uint8_t const *buffer, size_t length)
+static void _print_hex_buffer(uint8_t const *buf, size_t len)
 {
-    size_t idx;
+	size_t i;
 
-    for (idx = 0; buffer && idx < length; idx++)
-        printf("%02x", buffer[idx]);
+	for (i = 0; buf && i < len; i++)
+		printf("%02x", buf[i]);
 
-    fflush(NULL);
+	fflush(NULL);
 }
 
 /**
- * print_block_info - Display detailed information about a Block
+ * _block_print - Prints information about a Block
  *
- * @blk:    Pointer to the Block being displayed
- * @pos:    Position of the Block in the chain
- * @prefix: Prefix for each line
+ * @block:  Pointer to the Block to be printed
+ * @index:  Index of the Block in the Blockchain
+ * @indent: Lines prefix
  *
  * Return: FOREACH_CONTINUE
  */
-static int print_block_info(block_t const *blk, unsigned int pos, char const *prefix)
+static int _block_print(block_t const *block, unsigned int index,
+	char const *indent)
 {
-    if (!blk)
-    {
-        printf("%snull\n", prefix);
-        return (0);
-    }
+	if (!block)
+	{
+		printf("%snil\n", indent);
+		return (0);
+	}
 
-    printf("%sBlock: {\n", prefix);
+	printf("%sBlock: {\n", indent);
 
-    printf("%s    metadata: {\n", prefix);
-    printf("%s        index: %u,\n", prefix, blk->info.index);
-    printf("%s        difficulty: %u,\n", prefix, blk->info.difficulty);
-    printf("%s        timestamp: %lu,\n", prefix, blk->info.timestamp);
-    printf("%s        nonce: %lu,\n", prefix, blk->info.nonce);
-    printf("%s        prev_hash: ", prefix);
-    print_hex_data(blk->info.prev_hash, SHA256_DIGEST_LENGTH);
-    printf("\n%s    },\n", prefix);
+	printf("%s\tinfo: {\n", indent);
+	printf("%s\t\tindex: %u,\n", indent, block->info.index);
+	printf("%s\t\tdifficulty: %u,\n", indent, block->info.difficulty);
+	printf("%s\t\ttimestamp: %lu,\n", indent, block->info.timestamp);
+	printf("%s\t\tnonce: %lu,\n", indent, block->info.nonce);
+	printf("%s\t\tprev_hash: ", indent);
+	_print_hex_buffer(block->info.prev_hash, SHA256_DIGEST_LENGTH);
+	printf("\n%s\t},\n", indent);
 
-    printf("%s    content: {\n", prefix);
-    printf("%s        text: \"%s\",\n", prefix, blk->data.buffer);
-    printf("%s        length: %u\n", prefix, blk->data.len);
-    printf("%s    },\n", prefix);
+	printf("%s\tdata: {\n", indent);
+	printf("%s\t\tbuffer: \"%s\",\n", indent, block->data.buffer);
+	printf("%s\t\tlen: %u\n", indent, block->data.len);
+	printf("%s\t},\n", indent);
 
-    printf("%s    hash: ", prefix);
-    print_hex_data(blk->hash, SHA256_DIGEST_LENGTH);
+	printf("%s\thash: ", indent);
+	_print_hex_buffer(block->hash, SHA256_DIGEST_LENGTH);
 
-    printf("\n%s}\n", prefix);
+	printf("\n%s}\n", indent);
 
-    (void)pos;
-    return (0);
+	(void)index;
+	return (0);
 }
 
 /**
- * print_block_summary - Display summarized information about a Block
+ * _block_print_brief - Prints information about a Block (brief mode)
  *
- * @blk:    Pointer to the Block being summarized
- * @pos:    Position of the Block in the chain
- * @prefix: Prefix for each line
+ * @block:  Pointer to the Block to be printed
+ * @index:  Index of the Block in the Blockchain
+ * @indent: Lines prefix
  *
  * Return: FOREACH_CONTINUE
  */
-static int print_block_summary(block_t const *blk, unsigned int pos, char const *prefix)
+static int _block_print_brief(block_t const *block, unsigned int index,
+	char const *indent)
 {
-    if (!blk)
-    {
-        printf("%snull\n", prefix);
-        return (0);
-    }
+	if (!block)
+	{
+		printf("%snil\n", indent);
+		return (0);
+	}
 
-    printf("%sBlock: {\n", prefix);
+	printf("%sBlock: {\n", indent);
 
-    printf("%s    metadata: { %u, %u, %lu, %lu, ", prefix,
-           blk->info.index, blk->info.difficulty, blk->info.timestamp, blk->info.nonce);
-    print_hex_data(blk->info.prev_hash, SHA256_DIGEST_LENGTH);
-    printf(" },\n");
+	printf("%s\tinfo: { ", indent);
+	printf("%u, ", block->info.index);
+	printf("%u, ", block->info.difficulty);
+	printf("%lu, ", block->info.timestamp);
+	printf("%lu, ", block->info.nonce);
+	_print_hex_buffer(block->info.prev_hash, SHA256_DIGEST_LENGTH);
+	printf(" },\n");
 
-    printf("%s    content: { \"%s\", %u },\n", prefix, blk->data.buffer, blk->data.len);
+	printf("%s\tdata: { ", indent);
+	printf("\"%s\", ", block->data.buffer);
+	printf("%u", block->data.len);
+	printf(" },\n");
 
-    printf("%s    hash: ", prefix);
-    print_hex_data(blk->hash, SHA256_DIGEST_LENGTH);
+	printf("%s\thash: ", indent);
+	_print_hex_buffer(block->hash, SHA256_DIGEST_LENGTH);
 
-    printf("\n%s}\n", prefix);
+	printf("\n%s}\n", indent);
 
-    (void)pos;
-    return (0);
+	(void)index;
+	return (0);
 }
 
 /**
- * print_full_blockchain - Display all Blocks in a Blockchain
+ * _blockchain_print - Prints an entire Blockchain
  *
- * @chain: Pointer to the Blockchain to be displayed
+ * @blockchain: Pointer to the Blockchain to be printed
  */
-void print_full_blockchain(blockchain_t const *chain)
+void _blockchain_print(blockchain_t const *blockchain)
 {
-    printf("Blockchain: {\n");
+	printf("Blockchain: {\n");
 
-    printf("    blocks [%d]: [\n", llist_size(chain->chain));
-    llist_for_each(chain->chain, (node_func_t)print_block_info, "        ");
-    printf("    ]\n");
+	printf("\tchain [%d]: [\n", llist_size(blockchain->chain));
+	llist_for_each(blockchain->chain,
+		(node_func_t)_block_print, "\t\t");
+	printf("\t]\n");
 
-    printf("}\n");
-    fflush(NULL);
+	printf("}\n");
+	fflush(NULL);
 }
 
 /**
- * print_blockchain_summary - Display summarized Blockchain information
+ * _blockchain_print_brief - Prints an entire Blockchain (brief mode)
  *
- * @chain: Pointer to the Blockchain to be summarized
+ * @blockchain: Pointer to the Blockchain to be printed
  */
-void print_blockchain_summary(blockchain_t const *chain)
+void _blockchain_print_brief(blockchain_t const *blockchain)
 {
-    printf("Blockchain: {\n");
+	printf("Blockchain: {\n");
 
-    printf("    blocks [%d]: [\n", llist_size(chain->chain));
-    llist_for_each(chain->chain, (node_func_t)print_block_summary, "        ");
-    printf("    ]\n");
+	printf("\tchain [%d]: [\n", llist_size(blockchain->chain));
+	llist_for_each(blockchain->chain,
+		(node_func_t)_block_print_brief, "\t\t");
+	printf("\t]\n");
 
-    printf("}\n");
-    fflush(NULL);
+	printf("}\n");
+	fflush(NULL);
 }

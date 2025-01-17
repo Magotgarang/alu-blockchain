@@ -1,38 +1,37 @@
 #include "endianness.h"
 
 /**
- * detect_endianness - Determines the current system endianness
+ * _get_endianness - Get current endianness
  *
- * Return: 1 for little endian, 2 for big endian, 0 for unknown
+ * Return: 1 for little endiann, 2 for big endian, 0 for unknown
  */
-uint8_t detect_endianness(void)
+uint8_t _get_endianness(void)
 {
-    endian_check_t checker = {1};
+	_endian_t order = {1};
 
-    if (checker.bytes[0] == 1)
-        return (1);
-    if (checker.bytes[0] == 0)
-        return (2);
+	if (order.bytes[0] == 1)
+		return (1);
+	if (order.bytes[0] == 0)
+		return (2);
 
-    /* Unexpected case */
-    return (0);
+	/* Should not happen */
+	return (0);
 }
 
 /**
- * reverse_endianness - Reverses the byte order of a memory block
- * @ptr: Pointer to the memory block to modify
- * @length: The number of bytes in the memory block
+ * _swap_endian - Swap endianness
+ * @p: Address of the sequence to swap
+ * @size: Size of the sequence pointed to by @p
  */
-void reverse_endianness(void *ptr, size_t length)
+void _swap_endian(void *p, size_t size)
 {
-    size_t i;
-    uint8_t *byte_ptr = (uint8_t *)ptr;
+	size_t i;
+	uint8_t *n = (uint8_t *)p;
 
-    for (i = 0; i < length / 2; i++)
-    {
-        byte_ptr[i] ^= byte_ptr[length - i - 1];
-        byte_ptr[length - i - 1] ^= byte_ptr[i];
-        byte_ptr[i] ^= byte_ptr[length - i - 1];
-    }
+	for (i = 0; i < size / 2; i++)
+	{
+		n[i] ^= n[size - (i + 1)];
+		n[size - (i + 1)] ^= n[i];
+		n[i] ^= n[size - (i + 1)];
+	}
 }
-
