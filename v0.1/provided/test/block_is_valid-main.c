@@ -1,13 +1,14 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "blockchain.h"
+#include "../blockchain.h"
 
 /**
  * main - Entry point
  *
- * Return: EXIT_SUCCESS or EXIT_FAILURE
+ * Return: EXIT_SUCCESS||FAILURE
  */
+
 int main(void)
 {
 	blockchain_t *blockchain;
@@ -21,13 +22,12 @@ int main(void)
 	llist_add_node(blockchain->chain, block, ADD_NODE_REAR);
 
 	if (block_is_valid(first, NULL) != 0 ||
-	block_is_valid(block, first) != 0)
+		block_is_valid(block, first) != 0)
 	{
-		fprintf(stderr, "Block invalid\n");
+		fprintf(stderr, "Invalid Block\n");
 		return (EXIT_FAILURE);
 	}
-	printf("Block is valid\n");
-
+	printf("Blockchain is Valid dude!\n");
 	blockchain_destroy(blockchain);
 
 	return (EXIT_SUCCESS);
